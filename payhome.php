@@ -191,14 +191,14 @@
     $(document).ready(function() {
         const length = localStorage.length;
         if (length == 0) {
-            location.href = location.origin + "/pay/login.php";
+            location.href = location.origin + "/login.php";
         } // checklogin
     });
 
     function logout() {
         localStorage.clear();
         localStorage.setItem("status", 0);
-        location.href = location.origin + "/pay/login.php";
+        location.href = location.origin + "/login.php";
     }
 
     $("#formAdd").submit(function(event) {
@@ -223,7 +223,7 @@
                 text: 'โปรดกรอกให้ครบ !'
             })
         } else {
-            axios.post(location.origin + "/pay/controller.php",
+            axios.post(location.origin + "/controller.php",
                 JSON.stringify(data)
             ).then(function(res) {
                 if (res.data == 1) {
@@ -258,7 +258,7 @@
             "m_id": m_id,
             "action": "views"
         }
-        axios.post(location.origin + "/pay/controller.php",
+        axios.post(location.origin + "/controller.php",
             JSON.stringify(data)
         ).then(function(res) {
             const jsonObj = res.data;
@@ -309,7 +309,7 @@
             cancelButtonText: 'ยกเลิก'
         }).then((result) => {
             if (result.isConfirmed) {
-                axios.post(location.origin + "/pay/controller.php",
+                axios.post(location.origin + "/controller.php",
                     JSON.stringify(data)
                 ).then(function(res) {
                     $('#viewsPay').modal('hide');
@@ -336,7 +336,7 @@
             cancelButtonText: 'ยกเลิก'
         }).then((result) => {
             if (result.isConfirmed) {
-                axios.post(location.origin + "/pay/controller.php",
+                axios.post(location.origin + "/controller.php",
                     JSON.stringify(data)
                 ).then(function(res) {
                     if (res.data == 1) {
@@ -393,7 +393,7 @@
                 "total": total,
                 "action": "pay"
             }
-            axios.post(location.origin + "/pay/controller.php",
+            axios.post(location.origin + "/controller.php",
                 JSON.stringify(data)
             ).then(function(res) {
                 if (res.data.status == 1) {

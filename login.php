@@ -70,7 +70,7 @@
                 text: 'โปรดกรอกให้ครบ !'
             })
         } else {
-            axios.post(location.origin + "/pay/controller.php",
+            axios.post(location.origin + "/controller.php",
                 JSON.stringify(data)
             ).then(function(res) {
                 if (res.data.status == 1) {
@@ -86,7 +86,7 @@
                         timer: 2000
                     });
                     setTimeout(function() {
-                        location.href = location.origin + "/pay/payhome.php";
+                        location.href = location.origin + "/payhome.php";
                     }, 2300);
                 } else {
                     Swal.fire({
