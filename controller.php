@@ -13,8 +13,8 @@ if ($action == "add") {
     $query =  mysqli_query($con, $sql);
     $lastP_id = mysqli_insert_id($con);
 
-    $sql = "INSERT INTO tb_paydetails(p_id,pd_price,remain) VALUES ('$lastP_id',0,$p_price)";
-    $query =  mysqli_query($con, $sql);
+    // $sql = "INSERT INTO tb_paydetails(p_id,pd_price,remain) VALUES ('$lastP_id',0,$p_price)";
+    // $query =  mysqli_query($con, $sql);
 
     if ($query) {
         echo  "1";
@@ -107,7 +107,7 @@ if ($action == "add") {
     } else {
         echo "0";
     }
-}else if($action == "pay"){
+} else if ($action == "pay") {
     $p_id = $obj->p_id;
     $price = $obj->price;
     $total = $obj->total;
@@ -126,7 +126,7 @@ if ($action == "add") {
     if ($result) {
         $result = array("status" => 1);
         echo json_encode($result);
-    }else{
+    } else {
         $result = array("status" => 0);
         echo json_encode($result);
     }
@@ -153,4 +153,23 @@ if ($action == "add") {
 
     $result = array('status' => 1, 'data' => $return_arr);
     echo json_encode($result);
-} 
+} else if ($action == "deleteList") {
+    $p_id = $obj->p_id;
+    $sql = sprintf(
+        "DELETE FROM tb_paydetails  WHERE p_id = %d",
+        $con->escape_string($p_id),
+    );
+    $delete = mysqli_query($con, $sql);
+
+    $sql = sprintf(
+        "DELETE FROM tb_payproduct  WHERE p_id = %d",
+        $con->escape_string($p_id),
+    );
+
+    $delete = mysqli_query($con, $sql);
+    if ($delete) {
+        echo "1";
+    } else {
+        echo "0";
+    }
+}

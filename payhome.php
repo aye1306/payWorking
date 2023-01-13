@@ -1,4 +1,4 @@
-<?php include "connect.php";?>
+<?php include "connect.php"; ?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -14,16 +14,16 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.11.2/b-2.0.0/datatables.min.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.11.2/b-2.0.0/datatables.min.css" />
 
-<script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.11.2/b-2.0.0/datatables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.11.2/b-2.0.0/datatables.min.js"></script>
 
-    <title>pay - home</title>
+    <title>pay</title>
 </head>
 
 <body>
     <nav class="navbar navbar-light bg-primary fixed-top">
-        <a class="navbar-brand text-light" href="home.php"><Strong class="h3">pay</Strong></a>
+        <a class="navbar-brand text-light" href="payhome.php"><Strong class="h3">pay</Strong></a>
         <form class="form-inline my-2 my-lg-0">
             <button class="btn btn-outline-light my-2 my-sm-0" type="button" onclick="logout()"><i class="fas fa-sign-out-alt"></i></button>
         </form>
@@ -47,19 +47,21 @@
                     <thead class="thead-dark">
                         <tr>
                             <th scope="col">#</th>
-                            <th scope="col">ชื่อสินค้า</th>
+                            <th scope="col">รายการ</th>
                             <th scope="col">คงเหลือ</th>
                             <th scope="col">*</th>
                             <th scope="col">*</th>
                         </tr>
                     </thead>
-                    <tbody >
+                    <tbody>
                         <?php
-$sql   = "SELECT * FROM tb_payproduct";
-$query = mysqli_query($con, $sql);
-$i     = 1;
-while ($row = mysqli_fetch_array($query, MYSQLI_ASSOC)) {
-    ?>
+                        $sql   = "SELECT * FROM tb_payproduct";
+                        $query = mysqli_query($con, $sql);
+                        $i     = 1;
+                        $sumPrice = 0.0;
+                        while ($row = mysqli_fetch_array($query, MYSQLI_ASSOC)) {
+                            $sumPrice = floatval($sumPrice) + floatval($row["total_price"]);
+                        ?>
                             <tr>
                                 <th scope="row"><?php echo $i; ?></th>
                                 <td><?php echo $row["product_name"]; ?></td>
@@ -68,10 +70,17 @@ while ($row = mysqli_fetch_array($query, MYSQLI_ASSOC)) {
                                 <td><button type="button" class="btn btn-primary" onclick="pay(<?php echo $row['p_id']; ?>,'<?php echo $row['product_name']; ?>',<?php echo $row['total_price']; ?>)"><Strong>จ่าย</Strong></button></td>
                             </tr>
                         <?php
-$i++;
-}
-?>
+                            $i++;
+                        }
+
+                        ?>
                     </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="2" class="text-center">รวม</td>
+                            <td colspan="5" class="text-start"><?php echo floatval($sumPrice); ?> บาท</td>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
 
@@ -80,7 +89,7 @@ $i++;
 
     <!-- Modal Add-->
     <div class="modal fade" id="addPay" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel">เพิ่มสินค้าที่ผ่อน</h5>
@@ -96,12 +105,11 @@ $i++;
                         </div>
                         <div class="form-group">
                             <label for="exampleInputPassword1">ราคา</label>
-                            <input type="text" class="form-control" id="p_price" autocomplete="off">
+                            <input type="number" class="form-control" id="p_price" autocomplete="off">
                         </div>
                         <div class="d-flex justify-content-end">
                             <button type="submit" class="btn btn-success" name="addsubmit">บันทึก</button>
                         </div>
-
                     </form>
                 </div>
             </div>
@@ -119,19 +127,29 @@ $i++;
                     </button>
                 </div>
                 <div class="modal-body">
-                    <table class="table">
-                        <thead class="thead-dark">
-                            <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">ยอดผ่อน</th>
-                                <th scope="col">คงเหลือ</th>
-                                <th scope="col">*</th>
-                            </tr>
-                        </thead>
-                        <tbody id="payTbody">
-
-                        </tbody>
-                    </table>
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <input type="hidden" id="p_id">
+                            <button class="btn btn-danger" onclick="deleteList()">ลบรายการนี้</button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">ยอดผ่อน</th>
+                                    <th scope="col">คงเหลือ</th>
+                                    <th scope="col">*</th>
+                                </tr>
+                            </thead>
+                            <tbody id="payTbody">
+                                <tr>
+                                    <td colspan="4">ไม่มีรายการ</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -261,12 +279,12 @@ $i++;
                     "รายละเอียดของ " + jsonObj.data[0].product_name
                 )
                 $('#viewsPay').modal('show');
+                document.getElementById("p_id").value = p_id;
 
             } else {
                 Swal.fire({
-                    icon: 'error',
+                    icon: 'info',
                     title: 'ไม่มีรายการผ่อน',
-                    text: 'โปรดกรอกให้ครบ !'
                 })
             }
 
@@ -300,6 +318,49 @@ $i++;
         })
 
     }
+
+    function deleteList() {
+        const p_id = document.getElementById("p_id").value;
+        const data = {
+            "p_id": p_id,
+            "action": "deleteList"
+        }
+        Swal.fire({
+            title: 'ต้องการลบรายการ ?',
+            text: "รายการผ่อนจะถูกลบออกไป ถาวร",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'ลบออก',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                axios.post(location.origin + "/pay/controller.php",
+                    JSON.stringify(data)
+                ).then(function(res) {
+                    if (res.data == 1) {
+                        Swal.fire({
+                            icon: "success",
+                            title: 'ลบสำเร็จ',
+                            confirmButtonText: 'ok',
+                        }).then((result) => {
+                            location.reload();
+                        })
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: 'เกิดข้อผิดพลาด',
+                            confirmButtonText: 'ลองใหม่',
+                        })
+                    }
+
+                });
+            }
+        })
+
+    }
+
 
 
     function pay(p_id, p_name, remain) {
@@ -342,7 +403,7 @@ $i++;
                         confirmButtonText: 'ok',
                     }).then((result) => {
                         $('#Paymodal').modal('hide');
-                        $( "#bodytable" ).load(window.location.href + " #bodytable" );
+                        $("#bodytable").load(window.location.href + " #bodytable");
                     })
                 } else {
                     Swal.fire({
