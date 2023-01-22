@@ -19,54 +19,156 @@
     <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.11.2/b-2.0.0/datatables.min.js"></script>
 
     <title>pay</title>
+
+    <style>
+        .loader-content {
+            background-color: #1E4AC5;
+            height: 100vh;
+        }
+
+        .img-logo img {
+            width: 100vw;
+            height: 70vh;
+            object-fit: contain;
+        }
+
+        .ring {
+            position: absolute;
+            top: 65%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 150px;
+            height: 150px;
+            background: transparent;
+            border: 3px solid #fff;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 150px;
+            font-family: sans-serif;
+            font-size: 20px;
+            color: #fff;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px #1E4AC5;
+            box-shadow: 0 0 20px rgba(0, 0, 0, .5);
+        }
+
+        .ring:before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            width: 100%;
+            height: 100%;
+            border: 3px solid transparent;
+            border-top: 3px solid #1D92FF;
+            border-right: 3px solid #1D92FF;
+            border-radius: 50%;
+            animation: animateC 2s linear infinite;
+        }
+
+        span {
+            display: block;
+            position: absolute;
+            top: calc(50% - 2px);
+            left: 50%;
+            width: 50%;
+            height: 4px;
+            background: transparent;
+            transform-origin: left;
+            animation: animate 2s linear infinite;
+        }
+
+        span:before {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #0066FF;
+            top: -6px;
+            right: -8px;
+            box-shadow: 0 0 20px #0066FF;
+        }
+
+        @keyframes animateC {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes animate {
+            0% {
+                transform: rotate(45deg);
+            }
+
+            100% {
+                transform: rotate(405deg);
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <nav class="navbar navbar-light bg-primary fixed-top">
-        <a class="navbar-brand text-light" href="payhome.php"><Strong class="h3">pay</Strong></a>
-        <form class="form-inline my-2 my-lg-0">
-            <button class="btn btn-outline-light my-2 my-sm-0" type="button" onclick="logout()"><i class="fas fa-sign-out-alt"></i></button>
-        </form>
-    </nav>
+    <div id="content" style="display: none;">
+        <nav class="navbar navbar-light bg-primary fixed-top">
+            <a class="navbar-brand text-light" href="payhome.php"><Strong class="h3">Pay</Strong> <b id="member_name">คุณ na</b></a>
+            <form class="form-inline my-2 my-lg-0">
+                <button class="btn btn-outline-light my-2 my-sm-0" type="button" onclick="logout()"><i class="fas fa-sign-out-alt"></i></button>
+            </form>
+        </nav>
 
-    <div class="container" style="margin-top:100px;">
-        <div class="alert alert-primary d-flex justify-content-center" role="alert">
-            <strong>อัปเดทใหม่ แก้บัคข้อมูลผู้ใช้งาน</strong>
-        </div>
-        <div class="row">
-            <div class="col-md">
-                <h3>ตารางผ่อน</h3>
-                <button type="button" class="btn btn-success" data-toggle="modal" data-target="#addPay"><i class="fas fa-plus"></i></button>
+        <div class="container" style="margin-top:100px;">
+            <div class="alert alert-primary d-flex justify-content-center" role="alert">
+                <strong>อัปเดทใหม่ แก้บัคข้อมูลผู้ใช้งาน</strong>
+            </div>
+            <div class="row">
+                <div class="col-md">
+                    <h3>ตารางผ่อน</h3>
+                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#addPay"><i class="fas fa-plus"></i></button>
+                </div>
+
             </div>
 
-        </div>
+            <br>
 
-        <br>
+            <div class="row">
+                <div class="col-md">
+                    <table class="table" id="bodytable">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">รายการ</th>
+                                <th scope="col">คงเหลือ</th>
+                                <th scope="col">*</th>
+                                <th scope="col">*</th>
+                            </tr>
+                        </thead>
+                        <tbody id="body-data">
 
-        <div class="row">
-            <div class="col-md">
-                <table class="table" id="bodytable">
-                    <thead class="thead-dark">
-                        <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">รายการ</th>
-                            <th scope="col">คงเหลือ</th>
-                            <th scope="col">*</th>
-                            <th scope="col">*</th>
-                        </tr>
-                    </thead>
-                    <tbody id="body-data">
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="2" class="text-center">รวม</td>
+                                <td colspan="5" class="text-start" id="sumprice"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
 
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <td colspan="2" class="text-center">รวม</td>
-                            <td colspan="5" class="text-start" id="sumprice"></td>
-                        </tr>
-                    </tfoot>
-                </table>
             </div>
-
+        </div>
+    </div>
+    <div class="loader-content" id="loading" style="display: block;">
+        <div class="img-logo">
+            <img src="./img/logo.jpg">
+            <div class="ring">Loading
+                <span></span>
+            </div>
         </div>
     </div>
 
@@ -173,6 +275,12 @@
 </body>
 <script>
     $(document).ready(function() {
+        setTimeout(() => {
+            console.log("wow")
+            document.getElementById("loading").style.display = "none";
+            document.getElementById("content").style.display = "block";
+        }, 2000);
+
         const length = localStorage.length;
         if (length == 0) {
             location.href = location.origin + "/pay/login.php";
@@ -180,8 +288,10 @@
         getDataPay();
     });
 
+
     function getDataPay() {
         const memberData = JSON.parse(localStorage.MemberData);
+        document.getElementById("member_name").innerText = "( คุณ " + memberData.m_name + " )";
         const m_id = memberData.m_id;
         const data = {
             "m_id": m_id,
