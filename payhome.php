@@ -30,7 +30,9 @@
     </nav>
 
     <div class="container" style="margin-top:100px;">
-
+        <div class="alert alert-primary d-flex justify-content-center" role="alert">
+            <strong>อัปเดทใหม่ แก้บัคข้อมูลผู้ใช้งาน</strong>
+        </div>
         <div class="row">
             <div class="col-md">
                 <h3>ตารางผ่อน</h3>
@@ -53,32 +55,13 @@
                             <th scope="col">*</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <?php
-                        $sql   = "SELECT * FROM tb_payproduct";
-                        $query = mysqli_query($con, $sql);
-                        $i     = 1;
-                        $sumPrice = 0.0;
-                        while ($row = mysqli_fetch_array($query, MYSQLI_ASSOC)) {
-                            $sumPrice = floatval($sumPrice) + floatval($row["total_price"]);
-                        ?>
-                            <tr>
-                                <th scope="row"><?php echo $i; ?></th>
-                                <td><?php echo $row["product_name"]; ?></td>
-                                <td><?php echo $row["total_price"]; ?></td>
-                                <td><button type="button" class="btn btn-warning" onclick="views(<?php echo $row['p_id']; ?>)"><i class="far fa-eye"></i></button></td>
-                                <td><button type="button" class="btn btn-primary" onclick="pay(<?php echo $row['p_id']; ?>,'<?php echo $row['product_name']; ?>',<?php echo $row['total_price']; ?>)"><Strong>จ่าย</Strong></button></td>
-                            </tr>
-                        <?php
-                            $i++;
-                        }
+                    <tbody id="body-data">
 
-                        ?>
                     </tbody>
                     <tfoot>
                         <tr>
                             <td colspan="2" class="text-center">รวม</td>
-                            <td colspan="5" class="text-start"><?php echo floatval($sumPrice); ?> บาท</td>
+                            <td colspan="5" class="text-start" id="sumprice"></td>
                         </tr>
                     </tfoot>
                 </table>
@@ -171,10 +154,11 @@
                             <label for="remain">ยอดคงเหลือ</label>
                             <input type="text" class="form-control" id="remain" disabled>
                             <input type="hidden" class="form-control" id="p_idhidden">
+                            <input type="hidden" class="form-control" id="max_price">
                         </div>
                         <div class="form-group">
                             <label for="price">ราคา</label>
-                            <input type="text" class="form-control" id="price" placeholder="ใส่ราคาที่ต้องการผ่อน" autocomplete="off">
+                            <input type="number" class="form-control" id="price" placeholder="ใส่ราคาที่ต้องการผ่อน" autocomplete="off">
                         </div>
                         <div class="d-flex justify-content-end">
                             <button type="submit" class="btn btn-primary">บันทึกการจ่าย</button>
@@ -193,7 +177,52 @@
         if (length == 0) {
             location.href = location.origin + "/pay/login.php";
         } // checklogin
+        getDataPay();
     });
+
+    function getDataPay() {
+        const memberData = JSON.parse(localStorage.MemberData);
+        const m_id = memberData.m_id;
+        const data = {
+            "m_id": m_id,
+            "action": "List_pay"
+        }
+        axios.post(location.origin + "/pay/controller.php",
+            JSON.stringify(data)
+        ).then(function(res) {
+
+            const dataPay = res.data.data;
+            const bodyData = document.getElementById("body-data");
+            bodyData.innerHTML = ""
+            let sumPrice = 0.0;
+            if (dataPay.length == 0) {
+                bodyData.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center">คุณไม่มีรายการ</td>
+                </tr>
+                `
+
+                return;
+            }
+            dataPay.forEach((ele, i) => {
+                sumPrice = sumPrice + parseFloat(ele.total_price)
+                bodyData.innerHTML += `
+                <tr>
+                    <th scope="row">${i+1}</th>
+                    <td>${ele.product_name}</td>
+                    <td>${ele.total_price}</td>
+                    <td>
+                        <button type="button" class="btn btn-warning" onclick="views(${ele.p_id})"><i class="far fa-eye"></i></button>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-primary" onclick="pay(${ele.p_id},'${ele.product_name}',${ele.total_price})"><Strong>จ่าย</Strong></button>
+                    </td>
+                </tr>`
+            })
+
+            document.getElementById("sumprice").innerText = sumPrice + " บาท"
+        });
+    }
 
     function logout() {
         localStorage.clear();
@@ -382,6 +411,18 @@
                 title: 'ลืมกรอกราคา',
                 text: 'โปรดกรอกข้อมูล !'
             })
+        } else if ($("#price").val() <= 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'ราคาไม่ถูกต้อง',
+                text: 'โปรดกรอกข้อมูล !'
+            })
+        } else if ($("#price").val() > $("#remain").val()) {
+            Swal.fire({
+                icon: 'error',
+                title: 'จำนวนเกินกว่ายอดคงเหลือ',
+                text: 'โปรดกรอกข้อมูล !'
+            })
         } else {
             const remain = parseFloat($("#remain").val());
             const price = parseFloat($("#price").val());
@@ -403,15 +444,13 @@
                         confirmButtonText: 'ok',
                     }).then((result) => {
                         $('#Paymodal').modal('hide');
-                        $("#bodytable").load(window.location.href + " #bodytable");
+                        getDataPay()
                     })
                 } else {
                     Swal.fire({
                         icon: "error",
                         title: 'เกิดข้อผิดพลาด',
                         confirmButtonText: 'ลองใหม่',
-                    }).then((result) => {
-
                     })
                 }
             });

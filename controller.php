@@ -131,10 +131,9 @@ if ($action == "add") {
         echo json_encode($result);
     }
 } else if ($action == "List_pay") {
-    $p_id = $obj->p_id;
     $m_id = $obj->m_id;
 
-    $sql = "SELECT * FROM tb_payproduct";
+    $sql = "SELECT * FROM tb_payproduct WHERE m_id = " . $m_id;
     $query = mysqli_query($con, $sql);
 
     $return_arr = array();
@@ -144,9 +143,7 @@ if ($action == "add") {
         $row_array['product_name'] = $row['product_name'];
         $row_array['total_price'] = $row['total_price'];
         $row_array['time_reg'] = $row['time_reg'];
-        $row_array['product_name'] = $row['product_name'];
-        $row_array['total_price'] = $row['pd_price'];
-        $row_array['p_time_reg'] = $row['p_time_reg'];
+        $row_array['m_id'] = $row['m_id'];
 
         array_push($return_arr, $row_array);
     }
@@ -172,4 +169,6 @@ if ($action == "add") {
     } else {
         echo "0";
     }
+} else if ($action == "getDataPay") {
+    echo "get";
 }
