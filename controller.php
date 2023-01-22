@@ -98,7 +98,7 @@ if ($action == "add") {
     $pd_id = $obj->pd_id;
     $sql = sprintf(
         "DELETE FROM tb_paydetails  WHERE pd_id = %d",
-        $con->escape_string($pd_id),
+        $con->escape_string($pd_id)
     );
 
     $delete = mysqli_query($con, $sql);
@@ -154,13 +154,13 @@ if ($action == "add") {
     $p_id = $obj->p_id;
     $sql = sprintf(
         "DELETE FROM tb_paydetails  WHERE p_id = %d",
-        $con->escape_string($p_id),
+        $con->escape_string($p_id)
     );
     $delete = mysqli_query($con, $sql);
 
     $sql = sprintf(
         "DELETE FROM tb_payproduct  WHERE p_id = %d",
-        $con->escape_string($p_id),
+        $con->escape_string($p_id)
     );
 
     $delete = mysqli_query($con, $sql);
